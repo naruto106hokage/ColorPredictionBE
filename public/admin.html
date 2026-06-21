@@ -49,6 +49,7 @@
                 <label>Number<br><input id="adminNumber" type="number" min="0" max="9" style="width:100%" /></label>
                 <label>Amount<br><input id="adminAmount" type="number" min="1" style="width:100%" /></label>
                 <button id="placeAdminBet">Place Bet</button>
+                <button id="placeRandomBet" style="background:#28a745;color:white;border:none;padding:12px 18px;border-radius:12px;cursor:pointer;margin-left:8px;">Random Bet</button>
                 <p id="adminBetResult"></p>
             </div>
         </div>
@@ -164,7 +165,39 @@
             loadDashboard();
         }
 
+        async function placeRandomBet() {
+            const response = await adminFetch('/admin/dashboard');
+            if (!response.meta.status || !response.data.users || response.data.users.length === 0) {
+                document.getElementById('adminBetResult').textContent = 'No users available';
+                return;
+            }
+            if (!response.data.activeSlot) {
+                document.getElementById('adminBetResult').textContent = 'No active slot';
+                return;
+            }
+
+            const users = response.data.users;
+            const randomUser = users[Math.floor(Math.random() * users.length)];
+            const randomNumber = Math.floor(Math.random() * 10);
+            const randomAmount = Math.floor(Math.random() * 500) + 50;
+
+            const payload = {
+                userId: randomUser._id,
+                slotId: response.data.activeSlot._id,
+                number: randomNumber,
+                amount: randomAmount
+            };
+
+            const result = await adminFetch('/admin/bet', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            document.getElementById('adminBetResult').textContent = `${result.meta.msg} - User: ${randomUser.name}, Number: ${randomNumber}, Amount: ${randomAmount}`;
+            loadDashboard();
+        }
+
         document.getElementById('placeAdminBet').addEventListener('click', placeBet);
+        document.getElementById('placeRandomBet').addEventListener('click', placeRandomBet);
         document.getElementById('closeSlot').addEventListener('click', closeSlot);
         document.getElementById('newSlot').addEventListener('click', createNewSlot);
         document.getElementById('processSlot').addEventListener('click', processSlot);
