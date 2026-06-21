@@ -3,82 +3,362 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Color Prediction Game Admin</title>
+    <title>Admin Dashboard | Color Prediction Game</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6fb; color: #1c1c1c; }
-        header { background: #2f4b8f; color: white; padding: 16px 24px; }
-        main { padding: 24px; }
-        h1 { margin: 0 0 8px; }
-        .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
-        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 12px 30px rgba(0,0,0,.08); }
-        .card h2 { margin: 0 0 12px; font-size: 18px; color: #263238; }
-        .card p { margin: 0; font-size: 28px; font-weight: 700; }
-        .section { margin-top: 24px; }
-        pre { background: #eef2fe; padding: 16px; border-radius: 10px; overflow-x: auto; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 20px 24px;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 { font-size: 28px; font-weight: 700; }
+        header p { opacity: 0.85; margin-top: 4px; }
+
+        #logoutBtn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        #logoutBtn:hover { background: #ff3838; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,71,87,0.3); }
+
+        main { padding: 32px 24px; max-width: 1400px; margin: 0 auto; }
+
+        .section { margin-bottom: 40px; }
+        .section h2 {
+            font-size: 22px;
+            margin-bottom: 16px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #1e2d47 0%, #243543 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(255,255,255,0.15);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+            transform: translateY(-4px);
+        }
+
+        .card h2 {
+            font-size: 16px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card p {
+            font-size: 42px;
+            font-weight: 700;
+            color: #4da6ff;
+        }
+
+        .card.stat-danger p { color: #ff6b6b; }
+        .card.stat-success p { color: #51cf66; }
+        .card.stat-warning p { color: #ffd93d; }
+
+        .actions-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active { transform: translateY(0); }
+
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .btn-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
+        .btn-warning { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: #333; }
+
+        .form-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+        }
+
+        input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: white;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 12px rgba(102, 126, 234, 0.3);
+            background: rgba(102, 126, 234, 0.08);
+        }
+
+        .data-display {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        pre {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            color: #a8d8ff;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .status-msg {
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-top: 12px;
+            font-weight: 600;
+            background: rgba(80, 227, 194, 0.15);
+            color: #50e3c2;
+            border-left: 4px solid #50e3c2;
+        }
+
+        .status-msg.error {
+            background: rgba(255, 107, 107, 0.15);
+            color: #ff6b6b;
+            border-left-color: #ff6b6b;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table th {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #667eea;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .users-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .users-table tr:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge.banned { background: rgba(255,107,107,0.3); color: #ff6b6b; }
+        .badge.admin { background: rgba(102,126,234,0.3); color: #667eea; }
+        .badge.active { background: rgba(81,227,194,0.3); color: #50e3c2; }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(102,126,234,0.5);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(102,126,234,0.7);
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Color Prediction Game Admin</h1>
-        <p>Dashboard overview for slots, bets and users.</p>
+        <div>
+            <h1>⚡ Admin Dashboard</h1>
+            <p>Color Prediction Game Control Center</p>
+        </div>
+        <button id="logoutBtn">🚪 Logout</button>
     </header>
     <main>
-        <div class="grid" id="summary"></div>
+        <!-- Stats Grid -->
         <div class="section">
-            <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                <div>
-                    <h2>Admin Actions</h2>
-                    <p style="margin:0; color:#555;">Use these buttons to manage slots and simulate the game.</p>
+            <h2>📊 Overview</h2>
+            <div class="grid" id="summary"></div>
+        </div>
+
+        <!-- Game Controls -->
+        <div class="section">
+            <h2>🎮 Game Controls</h2>
+            <div class="card">
+                <div class="actions-row">
+                    <button id="closeSlot" class="btn-danger">⏹️ Close Active Slot</button>
+                    <button id="newSlot" class="btn-success">➕ Create New Slot</button>
+                    <button id="processSlot" class="btn-primary">⚙️ Process Game Now</button>
                 </div>
-                <button id="logoutBtn" style="background:#ff5a5f;color:white;border:none;padding:12px 18px;border-radius:12px;cursor:pointer;">Logout</button>
             </div>
         </div>
+
+        <!-- Place Bets -->
         <div class="section">
-            <h2>Game Controls</h2>
+            <h2>💰 Place Bets</h2>
             <div class="card">
-                <button id="closeSlot">Force Close Active Slot</button>
-                <button id="newSlot">Create New Slot</button>
-                <button id="processSlot">Process Game Now</button>
+                <div class="form-group">
+                    <label>User ID<input id="adminUserId" type="text" placeholder="Paste user ID" /></label>
+                    <label>Slot ID<input id="adminSlotId" type="text" placeholder="Paste slot ID" /></label>
+                    <label>Number (0-9)<input id="adminNumber" type="number" min="0" max="9" placeholder="0-9" /></label>
+                    <label>Amount<input id="adminAmount" type="number" min="1" placeholder="100" /></label>
+                </div>
+                <div class="actions-row">
+                    <button id="placeAdminBet" class="btn-primary">📍 Place Bet</button>
+                    <button id="placeRandomBet" class="btn-success">🎲 Random Bet</button>
+                </div>
+                <div id="adminBetResult" class="status-msg" style="display:none;"></div>
             </div>
         </div>
+
+        <!-- User Management -->
         <div class="section">
-            <h2>Place Bet as Admin</h2>
+            <h2>👥 User Management</h2>
             <div class="card">
-                <label>User ID<br><input id="adminUserId" type="text" style="width:100%" /></label>
-                <label>Slot ID<br><input id="adminSlotId" type="text" style="width:100%" /></label>
-                <label>Number<br><input id="adminNumber" type="number" min="0" max="9" style="width:100%" /></label>
-                <label>Amount<br><input id="adminAmount" type="number" min="1" style="width:100%" /></label>
-                <button id="placeAdminBet">Place Bet</button>
-                <button id="placeRandomBet" style="background:#28a745;color:white;border:none;padding:12px 18px;border-radius:12px;cursor:pointer;margin-left:8px;">Random Bet</button>
-                <p id="adminBetResult"></p>
+                <div class="form-group">
+                    <label>User ID<input id="banUserId" type="text" placeholder="Paste user ID" /></label>
+                </div>
+                <div class="actions-row">
+                    <button id="banUser" class="btn-danger">🚫 Ban User</button>
+                    <button id="unbanUser" class="btn-success">✅ Unban User</button>
+                </div>
+                <div id="userBanResult" class="status-msg" style="display:none;"></div>
             </div>
         </div>
+
+        <!-- Active Slot Info -->
         <div class="section">
-            <h2>User Management</h2>
+            <h2>🎯 Active Slot</h2>
             <div class="card">
-                <label>User ID<br><input id="banUserId" type="text" style="width:100%" /></label>
-                <button id="banUser">Ban User</button>
-                <button id="unbanUser">Unban User</button>
-                <p id="userBanResult"></p>
+                <div class="data-display">
+                    <pre id="activeSlot">Loading...</pre>
+                </div>
             </div>
         </div>
+
+        <!-- Users Table -->
         <div class="section">
-            <h2>Active Slot</h2>
-            <pre id="activeSlot">Loading...</pre>
+            <h2>📋 Users List</h2>
+            <div class="card">
+                <div style="overflow-x: auto;">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th>Top-up</th>
+                                <th>Winning</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr><td colspan="5" style="text-align:center; color:rgba(255,255,255,0.5);">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
+
+        <!-- Recent Slots -->
         <div class="section">
-            <h2>Recent Slots</h2>
-            <pre id="recentSlots">Loading...</pre>
+            <h2>📜 Recent Slots</h2>
+            <div class="card">
+                <div class="data-display">
+                    <pre id="recentSlots">Loading...</pre>
+                </div>
+            </div>
         </div>
+
+        <!-- Bet Stats -->
         <div class="section">
-            <h2>Bet Status Counts</h2>
-            <pre id="betStatusCounts">Loading...</pre>
-        </div>
-        <div class="section">
-            <h2>Users</h2>
-            <pre id="userList">Loading...</pre>
+            <h2>📈 Bet Statistics</h2>
+            <div class="card">
+                <div class="data-display">
+                    <pre id="betStatusCounts">Loading...</pre>
+                </div>
+            </div>
         </div>
     </main>
+
     <script>
         const authKey = localStorage.getItem('adminAuthKey') || '';
 
@@ -97,31 +377,52 @@
             return response.json();
         }
 
-        function logoutAdmin() {
-            localStorage.removeItem('adminAuthKey');
-            window.location.href = '/admin-login.html';
+        function showStatus(elementId, message, isError = false) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = 'status-msg' + (isError ? ' error' : '');
+            el.style.display = 'block';
         }
 
         async function loadDashboard() {
             const response = await adminFetch('/admin/dashboard');
             if (!response.meta.status) {
-                document.getElementById('summary').innerText = 'Unable to load dashboard';
+                document.getElementById('summary').innerHTML = '<div class="card" style="grid-column:1/-1;">Unable to load dashboard</div>';
                 return;
             }
 
             const data = response.data;
             const summary = document.getElementById('summary');
             summary.innerHTML = `
-                <div class="card"><h2>Total Users</h2><p>${data.totalUsers}</p></div>
-                <div class="card"><h2>Total Bets</h2><p>${data.totalBets}</p></div>
-                <div class="card"><h2>Total Bet Amount</h2><p>${data.totalBetAmount}</p></div>
-                <div class="card"><h2>Top-up Balance</h2><p>${data.totalTopUpBalance}</p></div>
-                <div class="card"><h2>Winning Wallet</h2><p>${data.totalWinningWallet}</p></div>
+                <div class="card"><h2>👥 Total Users</h2><p>${data.totalUsers}</p></div>
+                <div class="card"><h2>🎰 Total Bets</h2><p>${data.totalBets}</p></div>
+                <div class="card stat-warning"><h2>💵 Total Bet Amount</h2><p>${data.totalBetAmount}</p></div>
+                <div class="card stat-success"><h2>💳 Top-up Balance</h2><p>${data.totalTopUpBalance}</p></div>
+                <div class="card stat-danger"><h2>🏆 Winning Wallet</h2><p>${data.totalWinningWallet}</p></div>
             `;
+
             document.getElementById('activeSlot').textContent = JSON.stringify(data.activeSlot, null, 2);
             document.getElementById('recentSlots').textContent = JSON.stringify(data.recentSlots, null, 2);
             document.getElementById('betStatusCounts').textContent = JSON.stringify(data.betStatusCounts, null, 2);
-            document.getElementById('userList').textContent = JSON.stringify(data.users, null, 2);
+
+            // Render users table
+            const usersBody = document.getElementById('usersTableBody');
+            if (data.users && data.users.length > 0) {
+                usersBody.innerHTML = data.users.map(user => `
+                    <tr>
+                        <td>${user.name}</td>
+                        <td>${user.mobile}</td>
+                        <td>$${user.topUpBalance}</td>
+                        <td>$${user.winningWallet}</td>
+                        <td>
+                            ${user.isBanned ? '<span class="badge banned">🚫 Banned</span>' : '<span class="badge active">✅ Active</span>'}
+                            ${user.isAdmin ? '<span class="badge admin">👑 Admin</span>' : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                usersBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:rgba(255,255,255,0.5);">No users yet</td></tr>';
+            }
         }
 
         async function placeBet() {
@@ -131,11 +432,14 @@
                 number: Number(document.getElementById('adminNumber').value),
                 amount: Number(document.getElementById('adminAmount').value)
             };
+            if (!payload.userId || !payload.slotId || isNaN(payload.number) || isNaN(payload.amount)) {
+                return showStatus('adminBetResult', '⚠️ Please fill all fields', true);
+            }
             const result = await adminFetch('/admin/bet', {
                 method: 'POST',
                 body: JSON.stringify(payload)
             });
-            document.getElementById('adminBetResult').textContent = result.meta.msg;
+            showStatus('adminBetResult', result.meta.msg, !result.meta.status);
             loadDashboard();
         }
 
@@ -157,23 +461,13 @@
             loadDashboard();
         }
 
-        async function banUser(isBan) {
-            const userId = document.getElementById('banUserId').value;
-            const endpoint = isBan ? `/admin/user/${userId}/ban` : `/admin/user/${userId}/unban`;
-            const result = await adminFetch(endpoint, { method: 'POST' });
-            document.getElementById('userBanResult').textContent = result.meta.msg;
-            loadDashboard();
-        }
-
         async function placeRandomBet() {
             const response = await adminFetch('/admin/dashboard');
             if (!response.meta.status || !response.data.users || response.data.users.length === 0) {
-                document.getElementById('adminBetResult').textContent = 'No users available';
-                return;
+                return showStatus('adminBetResult', '⚠️ No users available', true);
             }
             if (!response.data.activeSlot) {
-                document.getElementById('adminBetResult').textContent = 'No active slot';
-                return;
+                return showStatus('adminBetResult', '⚠️ No active slot', true);
             }
 
             const users = response.data.users;
@@ -192,8 +486,22 @@
                 method: 'POST',
                 body: JSON.stringify(payload)
             });
-            document.getElementById('adminBetResult').textContent = `${result.meta.msg} - User: ${randomUser.name}, Number: ${randomNumber}, Amount: ${randomAmount}`;
+            showStatus('adminBetResult', `✅ ${result.meta.msg} | ${randomUser.name} bet $${randomAmount} on #${randomNumber}`, !result.meta.status);
             loadDashboard();
+        }
+
+        async function banUser(isBan) {
+            const userId = document.getElementById('banUserId').value;
+            if (!userId) return showStatus('userBanResult', '⚠️ Please enter user ID', true);
+            const endpoint = isBan ? `/admin/user/${userId}/ban` : `/admin/user/${userId}/unban`;
+            const result = await adminFetch(endpoint, { method: 'POST' });
+            showStatus('userBanResult', result.meta.msg, !result.meta.status);
+            loadDashboard();
+        }
+
+        function logoutAdmin() {
+            localStorage.removeItem('adminAuthKey');
+            window.location.href = '/admin-login.html';
         }
 
         document.getElementById('placeAdminBet').addEventListener('click', placeBet);
@@ -206,7 +514,6 @@
         document.getElementById('unbanUser').addEventListener('click', () => banUser(false));
 
         loadDashboard().catch(err => {
-            document.getElementById('summary').textContent = 'Error loading dashboard';
             console.error(err);
         });
     </script>
