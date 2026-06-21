@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Color Prediction Game Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f6fb; color: #1c1c1c; }
+        header { background: #2f4b8f; color: white; padding: 16px 24px; }
+        main { padding: 24px; }
+        h1 { margin: 0 0 8px; }
+        .grid { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); }
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 12px 30px rgba(0,0,0,.08); }
+        .card h2 { margin: 0 0 12px; font-size: 18px; color: #263238; }
+        .card p { margin: 0; font-size: 28px; font-weight: 700; }
+        .section { margin-top: 24px; }
+        pre { background: #eef2fe; padding: 16px; border-radius: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Color Prediction Game Admin</h1>
+        <p>Dashboard overview for slots, bets and users.</p>
+    </header>
+    <main>
+        <div class="grid" id="summary"></div>
+        <div class="section">
+            <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h2>Admin Actions</h2>
+                    <p style="margin:0; color:#555;">Use these buttons to manage slots and simulate the game.</p>
+                </div>
+                <button id="logoutBtn" style="background:#ff5a5f;color:white;border:none;padding:12px 18px;border-radius:12px;cursor:pointer;">Logout</button>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Game Controls</h2>
+            <div class="card">
+                <button id="closeSlot">Force Close Active Slot</button>
+                <button id="newSlot">Create New Slot</button>
+                <button id="processSlot">Process Game Now</button>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Place Bet as Admin</h2>
+            <div class="card">
+                <label>User ID<br><input id="adminUserId" type="text" style="width:100%" /></label>
+                <label>Slot ID<br><input id="adminSlotId" type="text" style="width:100%" /></label>
+                <label>Number<br><input id="adminNumber" type="number" min="0" max="9" style="width:100%" /></label>
+                <label>Amount<br><input id="adminAmount" type="number" min="1" style="width:100%" /></label>
+                <button id="placeAdminBet">Place Bet</button>
+                <p id="adminBetResult"></p>
+            </div>
+        </div>
+        <div class="section">
+            <h2>User Management</h2>
+            <div class="card">
+                <label>User ID<br><input id="banUserId" type="text" style="width:100%" /></label>
+                <button id="banUser">Ban User</button>
+                <button id="unbanUser">Unban User</button>
+                <p id="userBanResult"></p>
+            </div>
+        </div>
+        <div class="section">
+            <h2>Active Slot</h2>
+            <pre id="activeSlot">Loading...</pre>
+        </div>
+        <div class="section">
+            <h2>Recent Slots</h2>
+            <pre id="recentSlots">Loading...</pre>
+        </div>
+        <div class="section">
+            <h2>Bet Status Counts</h2>
+            <pre id="betStatusCounts">Loading...</pre>
+        </div>
+        <div class="section">
+            <h2>Users</h2>
+            <pre id="userList">Loading...</pre>
+        </div>
+    </main>
+    <script>
+        const authKey = localStorage.getItem('adminAuthKey') || '';
+
+        async function adminFetch(path, options = {}) {
+            const headers = {
+                'Content-Type': 'application/json',
+                'authkey': authKey,
+                ...options.headers
+            };
+            const response = await fetch(path, { ...options, headers });
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('adminAuthKey');
+                window.location.href = '/admin-login.html';
+                return { meta: { status: false, msg: 'Unauthorized' } };
+            }
+            return response.json();
+        }
+
+        function logoutAdmin() {
+            localStorage.removeItem('adminAuthKey');
+            window.location.href = '/admin-login.html';
+        }
+
+        async function loadDashboard() {
+            const response = await adminFetch('/admin/dashboard');
+            if (!response.meta.status) {
+                document.getElementById('summary').innerText = 'Unable to load dashboard';
+                return;
+            }
+
+            const data = response.data;
+            const summary = document.getElementById('summary');
+            summary.innerHTML = `
+                <div class="card"><h2>Total Users</h2><p>${data.totalUsers}</p></div>
+                <div class="card"><h2>Total Bets</h2><p>${data.totalBets}</p></div>
+                <div class="card"><h2>Total Bet Amount</h2><p>${data.totalBetAmount}</p></div>
+                <div class="card"><h2>Top-up Balance</h2><p>${data.totalTopUpBalance}</p></div>
+                <div class="card"><h2>Winning Wallet</h2><p>${data.totalWinningWallet}</p></div>
+            `;
+            document.getElementById('activeSlot').textContent = JSON.stringify(data.activeSlot, null, 2);
+            document.getElementById('recentSlots').textContent = JSON.stringify(data.recentSlots, null, 2);
+            document.getElementById('betStatusCounts').textContent = JSON.stringify(data.betStatusCounts, null, 2);
+            document.getElementById('userList').textContent = JSON.stringify(data.users, null, 2);
+        }
+
+        async function placeBet() {
+            const payload = {
+                userId: document.getElementById('adminUserId').value,
+                slotId: document.getElementById('adminSlotId').value,
+                number: Number(document.getElementById('adminNumber').value),
+                amount: Number(document.getElementById('adminAmount').value)
+            };
+            const result = await adminFetch('/admin/bet', {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            document.getElementById('adminBetResult').textContent = result.meta.msg;
+            loadDashboard();
+        }
+
+        async function closeSlot() {
+            const result = await adminFetch('/admin/slot/close', { method: 'POST' });
+            alert(result.meta.msg);
+            loadDashboard();
+        }
+
+        async function createNewSlot() {
+            const result = await adminFetch('/admin/slot/new', { method: 'POST' });
+            alert(result.meta.msg);
+            loadDashboard();
+        }
+
+        async function processSlot() {
+            const result = await adminFetch('/admin/slot/process', { method: 'POST' });
+            alert(result.meta.msg);
+            loadDashboard();
+        }
+
+        async function banUser(isBan) {
+            const userId = document.getElementById('banUserId').value;
+            const endpoint = isBan ? `/admin/user/${userId}/ban` : `/admin/user/${userId}/unban`;
+            const result = await adminFetch(endpoint, { method: 'POST' });
+            document.getElementById('userBanResult').textContent = result.meta.msg;
+            loadDashboard();
+        }
+
+        document.getElementById('placeAdminBet').addEventListener('click', placeBet);
+        document.getElementById('closeSlot').addEventListener('click', closeSlot);
+        document.getElementById('newSlot').addEventListener('click', createNewSlot);
+        document.getElementById('processSlot').addEventListener('click', processSlot);
+        document.getElementById('logoutBtn').addEventListener('click', logoutAdmin);
+        document.getElementById('banUser').addEventListener('click', () => banUser(true));
+        document.getElementById('unbanUser').addEventListener('click', () => banUser(false));
+
+        loadDashboard().catch(err => {
+            document.getElementById('summary').textContent = 'Error loading dashboard';
+            console.error(err);
+        });
+    </script>
+</body>
+</html>

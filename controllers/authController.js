@@ -14,6 +14,9 @@ exports.sendLoginOtp = async (req, res) => {
         if (!user) {
             return res.status(404).json({ meta: { status: false, msg: 'User not found' } });
         }
+        if (user.isBanned) {
+            return res.status(403).json({ meta: { status: false, msg: 'This account is banned' } });
+        }
 
         const otp = generateOtp();
         user.otp = otp;
@@ -41,6 +44,9 @@ exports.verifyLoginOtp = async (req, res) => {
 
         if (!user) {
             return res.status(400).json({ meta: { status: false, msg: 'Invalid or expired OTP' } });
+        }
+        if (user.isBanned) {
+            return res.status(403).json({ meta: { status: false, msg: 'This account is banned' } });
         }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });

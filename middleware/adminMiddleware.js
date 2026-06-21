@@ -1,4 +1,3 @@
-
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -11,13 +10,15 @@ module.exports = async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = await User.findById(decoded.id).select('-password');
-        if (!req.user) {
-            return res.status(401).json({ meta: { status: false, msg: 'Token is not valid' } });
+        if (decoded.admin) {
+            req.user = { isAdmin: true, isBanned: false };
+            return next();
         }
-        if (req.user.isBanned) {
-            return res.status(403).json({ meta: { status: false, msg: 'Your account is banned' } });
+        const user = await User.findById(decoded.id).select('-password');
+        if (!user || !user.isAdmin) {
+            return res.status(403).json({ meta: { status: false, msg: 'Admin access required' } });
         }
+        req.user = user;
         next();
     } catch (err) {
         res.status(401).json({ meta: { status: false, msg: 'Token is not valid' } });

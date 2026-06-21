@@ -69,8 +69,9 @@ const processGame = async () => {
             }
         }
 
-        winningNumber = 1;
-        console.log(`Calculated winning number: ${winningNumber}`);
+        // Choose one of the least-bet numbers if there is a tie.
+        winningNumber = tiedNumbers[Math.floor(Math.random() * tiedNumbers.length)];
+        console.log(`Calculated winning number from least bets: ${winningNumber}`);
     }
 
     // Update slot with winning number and mark as completed

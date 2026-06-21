@@ -12,6 +12,8 @@ const userSchema = new mongoose.Schema({
     token: { type: String },
     topUpBalance: { type: Number, default: 0 },
     winningWallet: { type: Number, default: 0 },
+    isAdmin: { type: Boolean, default: false },
+    isBanned: { type: Boolean, default: false },
     status: { type: String, default: 'active' }
 }, { timestamps: true });
 
